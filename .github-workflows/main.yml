@@ -1,3 +1,6 @@
+- name: SCP deploy action
+  uses: nogsantos/ssh-scp-deploy@v1.3.0
+
 SSH_USER: cog
 SSH_HOST: shell.mayfirst.org
 SSH_PORT: 22
