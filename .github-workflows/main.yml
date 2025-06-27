@@ -1,0 +1,51 @@
+SSH_USER: cog
+SSH_HOST: shell.mayfirst.org
+SSH_PORT: 22
+SSH_DIR: mysql005.mayfirst.org
+SSH_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJSS3yQOM5DACRcxlNbgjnpWXm/esBvpc+r08A51E/Bu
+PASSWORD: ydm.BVW!kve2qrz*cvc
+
+name: Build and deploy static site to May First server
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      deploy_comment:
+        description: "Deploy comment"
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    env:
+      EXAMPLE_CONFIDENTIAL_ENV_VARIABLE: ${{secrets.EXAMPLE_CONFIDENTIAL_ENV_VARIABLE}}
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Bucket actions
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm i
+      - run: npm run build
+        
+      - name: connect to may first shell
+        uses: baisong/mayfirst-shell-action@v0.1.0
+        with:
+          comment: ${{ inputs.deploy_comment }}
+          user: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
+
+      - name: Publish
+        uses: nogsantos/ssh-scp-deploy@v1.3.0
+        with:
+          src: mysql005.mayfirst.org/backend1
+          host: ${{ secrets.SSH_HOST }}
+          remote: ${{ secrets.SSH_DIR }}
+          port: ${{ secrets.SSH_PORT }}
+          user: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
